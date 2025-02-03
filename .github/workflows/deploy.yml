@@ -24,7 +24,10 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/gitcicd
           chmod 600 ~/.ssh/gitcicd
-          ssh-keyscan -H 34.64.135.207 >> ~/.ssh/known_hosts
+          echo "Running ssh-keyscan..."  # 디버깅을 위한 메시지
+          ssh-keyscan -H 34.64.135.207 >> ~/.ssh/known_hosts || echo "ssh-keyscan failed"  # 실패 시 에러 메시지 출력
+          ls -al ~/.ssh  # 디버깅을 위한 파일 목록 확인
+          cat ~/.ssh/known_hosts  # known_hosts 내용 확인
 
       - name: Build and Deploy
         run: |
