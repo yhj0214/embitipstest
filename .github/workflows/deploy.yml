@@ -18,6 +18,13 @@ jobs:
         with:
           java-version: 17
 
+      - name: Setup SSH keys
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 34.64.135.207 >> ~/.ssh/known_hosts
+
       - name: Build and Deploy
         run: |
           ./gradlew build
