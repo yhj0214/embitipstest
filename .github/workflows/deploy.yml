@@ -21,4 +21,5 @@ jobs:
       - name: Build and Deploy
         run: |
           ./gradlew build
-          scp build/libs/your-app.jar user@server:/path/to/deploy
+          scp build/libs/embitipstest-0.0.1.jar Yuhojae@34.64.135.207:/home/Yuhojae/embitips-app
+
