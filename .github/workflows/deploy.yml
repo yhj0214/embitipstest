@@ -22,8 +22,8 @@ jobs:
       - name: Setup SSH keys
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/gitcicd
+          chmod 600 ~/.ssh/gitcicd
           ssh-keyscan -H 34.64.135.207 >> ~/.ssh/known_hosts
 
       - name: Build and Deploy
