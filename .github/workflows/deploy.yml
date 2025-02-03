@@ -19,6 +19,9 @@ jobs:
           java-version: 17
           distribution: 'temurin'
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Setup SSH keys
         run: |
           mkdir -p ~/.ssh
