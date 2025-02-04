@@ -10,6 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY}}
+          port: 22
+          script: |
+            cd ${{ github.event.repository.name }}
+            pwd
+            sh deploy-ssh.sh
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -30,7 +42,7 @@ jobs:
           echo "Running ssh-keyscan..."  # 디버깅을 위한 메시지
           ssh-keyscan -H 34.64.135.207 >> ~/.ssh/known_hosts
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
 
       - name: Build and Deploy
         run: |
