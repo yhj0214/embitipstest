@@ -10,18 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: executing remote ssh commands using ssh key
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY}}
-          port: 22
-          script: |
-            cd ${{ github.event.repository.name }}
-            pwd
-            sh deploy-ssh.sh
-
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -34,19 +22,34 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Setup SSH keys
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/gcp_key
-          chmod 600 ~/.ssh/gcp_key
-          echo "Running ssh-keyscan..."  # 디버깅을 위한 메시지
-          ssh-keyscan -H 34.64.135.207 >> ~/.ssh/known_hosts
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+      - name: Build the project
+        run: ./gradlew build
 
-      - name: Build and Deploy
-        run: |
-          ./gradlew build
-          ls -al build/libs
-          scp build/libs/embitipstest-0.0.1-SNAPSHOT.jar yuhojae27@34.64.135.207:/home/Yuhojae/embitips-app
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY}}
+          port: 22
+          script: |
+            cd /home/Yuhojae/embitips-app
+            ls -al
+            java -jar /home/Yuhojae/embitips-app/build/libs/embitipstest-0.0.1-SNAPSHOT.jar
+
+#      - name: Setup SSH keys
+#        run: |
+#          mkdir -p ~/.ssh
+#          echo "$SSH_PRIVATE_KEY" > ~/.ssh/gcp_key
+#          chmod 600 ~/.ssh/gcp_key
+#          echo "Running ssh-keyscan..."  # 디버깅을 위한 메시지
+#          ssh-keyscan -H 34.64.135.207 >> ~/.ssh/known_hosts
+#        env:
+#          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+
+#      - name: Build and Deploy
+#        run: |
+#          ./gradlew build
+#          ls -al build/libs
+#          scp build/libs/embitipstest-0.0.1-SNAPSHOT.jar yuhojae27@34.64.135.207:/home/Yuhojae/embitips-app
 
