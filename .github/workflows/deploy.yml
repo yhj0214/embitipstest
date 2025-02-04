@@ -32,10 +32,11 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY}}
           port: 22
+          source: "./build/libs/embitipstest-0.0.1-SNAPSHOT.jar"
+          target: "/home/Yuhojae/embitips-app"
           script: |
             cd /home/Yuhojae/embitips-app
             ls -al
-            scp build/libs/embitipstest-0.0.1-SNAPSHOT.jar yuhojae27@34.64.135.207:/home/Yuhojae/embitips-app
             java -jar /home/Yuhojae/embitips-app/build/libs/embitipstest-0.0.1-SNAPSHOT.jar
 
 #      - name: Setup SSH keys
