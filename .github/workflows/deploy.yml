@@ -23,8 +23,9 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build the project
-        run: ./gradlew build
-
+        run: |
+          ./gradlew build
+          ls -al build/libs
       - name: executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
         with:
@@ -36,7 +37,6 @@ jobs:
           target: "/home/Yuhojae/embitips-app"
           script: |
             cd /home/Yuhojae/embitips-app
-            ls -al
             java -jar /home/Yuhojae/embitips-app/build/libs/embitipstest-0.0.1-SNAPSHOT.jar
 
 #      - name: Setup SSH keys
