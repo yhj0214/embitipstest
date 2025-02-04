@@ -25,7 +25,9 @@ jobs:
       - name: Build the project
         run: |
           ./gradlew build
-          ls -al build/libs
+          echo "Current working directory: $(pwd)"  # 현재 작업 디렉토리 경로 출력
+          echo "Build files located in: $(pwd)/build/libs"  # 빌드 파일 경로 출력
+          ls -al build/libs  # 빌드된 파일이 있는 디렉토리 출력
       - name: executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
         with:
