@@ -13,4 +13,8 @@ public class TestController {
         System.out.println("test");
         return "test";
     }
+    @GetMapping("/test1")
+    public String test1(){
+        return "testtest";
+    }
 }
