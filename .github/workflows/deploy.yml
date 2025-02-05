@@ -6,54 +6,44 @@ on:
       - main
 
 jobs:
-  deploy:
+  CI-CD:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: 'temurin'
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      # gradle build
+      - name: Build with Gradle
+        run: ./gradlew build -x test
 
-      - name: Build the project
+      # docker build & push to production
+      - name: Docker build & push to prod
+        if: contains(github.ref, 'main')
         run: |
-          ./gradlew build
-          echo "Current working directory: $(pwd)"  # 현재 작업 디렉토리 경로 출력
-          echo "Build files located in: $(pwd)/build/libs"  # 빌드 파일 경로 출력
-          ls -al build/libs  # 빌드된 파일이 있는 디렉토리 출력
-      - name: executing remote ssh commands using ssh key
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/embitips_back .
+          docker push ${{ secrets.DOCKER_USERNAME }}/embitips_back
+
+      ## deploy to production
+      - name: Deploy to prod
         uses: appleboy/ssh-action@master
+        id: deploy-prod
+        if: contains(github.ref, 'main')
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY}}
-          port: 22
-          source: "./build/libs/embitipstest-0.0.1-SNAPSHOT.jar"
-          target: "/home/Yuhojae/embitips-app"
+          host: ${{ secrets.HOST_PROD }} # EC2 퍼블릭 IPv4 DNS
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          envs: GITHUB_SHA
           script: |
-            cd /home/Yuhojae/embitips-app
-            java -jar /home/Yuhojae/embitips-app/build/libs/embitipstest-0.0.1-SNAPSHOT.jar
-
-#      - name: Setup SSH keys
-#        run: |
-#          mkdir -p ~/.ssh
-#          echo "$SSH_PRIVATE_KEY" > ~/.ssh/gcp_key
-#          chmod 600 ~/.ssh/gcp_key
-#          echo "Running ssh-keyscan..."  # 디버깅을 위한 메시지
-#          ssh-keyscan -H 34.64.135.207 >> ~/.ssh/known_hosts
-#        env:
-#          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-
-#      - name: Build and Deploy
-#        run: |
-#          ./gradlew build
-#          ls -al build/libs
-#          scp build/libs/embitipstest-0.0.1-SNAPSHOT.jar yuhojae27@34.64.135.207:/home/Yuhojae/embitips-app
+            # 기존 컨테이너 중지 및 삭제
+            sudo docker stop embitips_back || true
+            sudo docker rm embitips_back || true
+            sudo docker ps
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/embitips_back
+            sudo docker run -d -p 8080:8080 --name embitips_back ${{ secrets.DOCKER_USERNAME }}/embitips_back
+            sudo docker image prune -f
 
